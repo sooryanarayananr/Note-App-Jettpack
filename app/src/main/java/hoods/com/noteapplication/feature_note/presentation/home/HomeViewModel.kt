@@ -19,7 +19,6 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getAllNotesUseCase: GetAllNotesUseCase,
     private val deleteNotesUseCase: DeleteNoteUseCase,
-    private val updateNotesUseCase: UpdateNoteUseCase
 ):ViewModel() {
     private val _state:MutableStateFlow<HomeState> = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow() //read only for room

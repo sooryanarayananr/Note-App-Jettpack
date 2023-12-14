@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,7 +43,7 @@ fun DetailScreen(
     DetailScreen(
         modifier = modifier,
         isUpdatingNote = state.isUpdatingNote,
-        isFormNotBlank = state.isUpdatingNote,
+        isFormNotBlank = viewModel.isFormNotBlank,
         title = state.title,
         content =state.content,
         onContentChange = viewModel::onContentChange,
@@ -149,7 +148,9 @@ private fun NotesTextField(
             disabledContainerColor = Color.Transparent,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+
         ),
         placeholder = {
             Text(

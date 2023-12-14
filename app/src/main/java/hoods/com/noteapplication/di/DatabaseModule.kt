@@ -14,7 +14,6 @@ import hoods.com.noteapplication.feature_note.domain.use_case.AddNoteUseCase
 import hoods.com.noteapplication.feature_note.domain.use_case.DeleteNoteUseCase
 import hoods.com.noteapplication.feature_note.domain.use_case.GetAllNotesUseCase
 import hoods.com.noteapplication.feature_note.domain.use_case.GetNoteByIdUseCase
-import hoods.com.noteapplication.feature_note.domain.use_case.NoteUseCases
 import javax.inject.Singleton
 
 @Module

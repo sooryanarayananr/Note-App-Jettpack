@@ -6,10 +6,13 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -17,6 +20,7 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -50,13 +54,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import hoods.com.noteapplication.common.ScreenViewState
 import hoods.com.noteapplication.feature_note.data.local.model.Note
+import hoods.com.noteapplication.feature_note.presentation.detail.DeatilAssistedFactory
 import hoods.com.noteapplication.feature_note.presentation.home.HomeScreen
 import hoods.com.noteapplication.feature_note.presentation.home.HomeState
+import hoods.com.noteapplication.feature_note.presentation.home.HomeViewModel
+import hoods.com.noteapplication.feature_note.presentation.navigation.NoteNavigation
+import hoods.com.noteapplication.feature_note.presentation.navigation.Screens
+import hoods.com.noteapplication.feature_note.presentation.navigation.navigateToSingleTop
+import javax.inject.Inject
 
 data class BottomNavigationItem(
     val title: String,
@@ -66,12 +78,15 @@ data class BottomNavigationItem(
     val badgeCount: Int? = null
 )
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    lateinit var assistedFactory: DeatilAssistedFactory
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
+            val homeViewModel: HomeViewModel = viewModel()
+            val navController = rememberNavController()
             val items = listOf(
                 BottomNavigationItem(
                     title = "Daybook",
@@ -146,49 +161,12 @@ class MainActivity : ComponentActivity() {
                 ) {
                     when (selectedItemIndex) {
                         0 -> {
-                            var hasLoadedHome = false
-                            val navController = rememberNavController()
-                            val onDeleteNote: (Note) -> Unit = { /* Handle note deletion */ }
-                            val state = HomeState(notes = ScreenViewState.Loading) // Initial loading state
-
                             Box(modifier = Modifier.fillMaxSize()) {
-                                if (hasLoadedHome) {
-                                    NavHost(
-                                        modifier = Modifier.fillMaxSize(),
-                                        navController = rememberNavController(),
-                                        startDestination = "home"
-                                    ) {
-                                        composable("home") {
-                                            HomeScreen(
-                                                navController = navController,
-                                                state = state,
-                                                onDeleteNote = { },
-                                                onNoteClicked = { /* Handle note click navigation */ }
-                                            )
-                                        }
-                                    }
-                                }
-
                                 FloatingActionButton(
                                     onClick = {
-                                        if (!hasLoadedHome) {
-                                            hasLoadedHome = true
-
-                                            NavHost(
-                                                modifier = Modifier.fillMaxSize(),
-                                                navController = rememberNavController(),
-                                                startDestination = "home"
-                                            ) {
-                                                composable("home") {
-                                                    HomeScreen(
-                                                        navController = navController,
-                                                        state = state,
-                                                        onDeleteNote = { },
-                                                        onNoteClicked = { /* Handle note click navigation */ }
-                                                    )
-                                                }
-                                            }
-                                        }
+                                        navController.navigateToSingleTop(
+                                            route = Screens.Detail.name
+                                        )
                                     },
                                     modifier = Modifier
                                         .align(Alignment.Center)
@@ -201,7 +179,14 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }
+                            NoteNavigation(
+                                modifier = Modifier.padding(it),
+                                navHostController = navController,
+                                homeViewModel = homeViewModel,
+                                assistedFactory = assistedFactory
+                            )
                         }
+
                         1 -> {
                             // Content for Calendar
                         }
@@ -282,3 +267,101 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 fun GreetingPreview() {
     Greeting("Android")
 }
+
+//@AndroidEntryPoint
+//class MainActivity : ComponentActivity() {
+//    @Inject
+//    lateinit var assistedFactory: DeatilAssistedFactory
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        setContent {
+//            Surface(
+//                modifier = Modifier.fillMaxWidth(),
+//                color = MaterialTheme.colorScheme.background,
+//                contentColor = MaterialTheme.colorScheme.onSurface
+//            )
+//            {
+//            NoteApp()
+//            }
+//        }
+//    }
+//
+//    @OptIn(ExperimentalMaterial3Api::class)
+//    @Composable
+//    fun NoteApp() {
+//        val homeViewModel: HomeViewModel = viewModel()
+//        val navController = rememberNavController()
+//        var currentTab by remember {
+//            mutableStateOf(TabScreen.Home)
+//        }
+//        Scaffold(
+//            bottomBar = {
+//                BottomAppBar(
+//                    actions = {
+//                        Row(
+//                            horizontalArrangement = Arrangement.Center
+//                        )
+//                        {
+//                            InputChip(
+//                                selected = currentTab == TabScreen.Home,
+//                                onClick = {
+//                                    currentTab = TabScreen.Home
+//                                    navController.navigateToSingleTop(
+//                                        route = Screens.Home.name
+//                                    )
+//                                },
+//                                label = {
+//                                    Text("Home")
+//                                },
+//                                trailingIcon = {
+//                                    Icon(
+//                                        imageVector = Icons.Default.Home,
+//                                        contentDescription = null
+//                                    )
+//                                }
+//                            )
+//                            Spacer(modifier = Modifier.Companion.size(12.dp))
+//                        }
+//                    },
+//                    floatingActionButton = {
+//                        FloatingActionButton(
+//                            onClick = {
+//                                navController.navigateToSingleTop(
+//                                    route = Screens.Detail.name
+//                                )
+//                            }
+//                        ) {
+//                            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+//                        }
+//                    }
+//                )
+//            }
+//        )
+//        {
+//            NoteNavigation(
+//                modifier = Modifier.padding(it),
+//                navHostController = navController,
+//                homeViewModel = homeViewModel,
+//                assistedFactory = assistedFactory
+//            )
+//        }
+//    }
+//}
+//
+//enum class TabScreen {
+//    Home
+//}
+//
+//@Composable
+//fun Greeting(name: String, modifier: Modifier = Modifier) {
+//    Text(
+//        text = "Hello $name!",
+//        modifier = modifier
+//    )
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    Greeting("Android")
+//}
